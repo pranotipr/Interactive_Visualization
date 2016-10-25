@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+  <head>
+    <title>Viz 3: US Tennis Open Mens</title>
+    <meta charset="utf-8">
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <!-- Pie chart-->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    
+    <!-- Bar chart -->
+    <script src="lib/d3.js"></script>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/bootstrap.js"></script>
+
+    <!-- Pie chart css -->
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <link rel="stylesheet" href="css/style_chart.css">
+    <script type="text/javascript">
+    </script>
+    <!-- Bar chart -->
+    <style>
+      body {
+        font: 9px sans-serif;
+        color: #121401;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #121401;
+        stroke-width: 2px;
+        shape-rendering: crispEdges;
+      }
+
+      #text-select {
+        float:right;
+      }  
+
+      #all, .findings {
+        margin: auto;
+        width: 80%;
+        padding: 10px;
+      }
+
+      li {
+        font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size:13px;
+      }
+
+      #update_heading {
+       -webkit-transition: opacity .5s ease-in-out;
+       -moz-transition: opacity .5s ease-in-out;
+       -ms-transition: opacity .5s ease-in-out;
+       -o-transition: opacity .5s ease-in-out;
+       transition: opacity .5s ease-in-out;
+    }
+
+      }
+    </style>
+
+  </head>
+  <body>
+    <!-- Heading -->
+    <h1 align="center" style="color:brown;">Comparing top 11 countries in tennis on their Service Quality</h1>
+	<h3 align="center" style="color:gray;">Click on the bars below to see data corresponding to each country</h3>
+    <hr>
+  
+    <div align="center" id= "all">
+        <div id ="bar_chart" >
+        </div>
+    </div>
+    <h4 align="center" >Service Quality Index=   (Average First Serve)% - (Average Double(fault))% / 100</h4>
+	<h3 align="center" >Service Quality Index for top 10 countries in tennis aggregated over 2003-2013</h3>
+    <hr>  
+    <div id= "all">
+        <h1 align="center" style="color:brown;">Aces for each player Countrywise </h1>
+			<h3 align="center" style="color:gray;">Click on the countries clusters below to see data corresponding to each player</h3>
+    </div>
+    <div align="center" >
+          <iframe align="center" style="display:none;border:none;" width="60%" height="1100" id="graph"></iframe>
+
+ </div>
+ <h3 align="center" >Average Aces for each players countrywise aggregated over 2003-2013</h3>
+    <hr>
+     <div class="findings">
+    
+  </div>
+
+<script src = "js/pie_chart2.js"></script>
+<script>
+	
+		function showValue(name){
+		document.getElementById("graph").style.display = "block";
+		
+		//alert("aa="+name);
+		if(name==="SUI" ||name==="SLO" || name==="NED" || name==="SRB" || name==="USA"){
+					// $('#selectedTarget').load('zoomGraphFiles/index1.html');
+			window.frames["graph"].src ="zoomGraphFiles/index1.html"
+		}
+		else if(name==="RUS" ||name==="ESP" || name==="FRA"){
+			//document.getElementById("graph").style.diaplay="block";
+			
+			window.frames["graph"].src ="zoomGraphFiles/index2.html"
+					//window.location="zoomGraphFiles/index2.html";
+					// $('#selectedTarget').load('zoomGraphFiles/index2.html');
+		}
+		else if(name==="ARG" ||name==="GER" || name==="ITA"){
+			window.frames["graph"].src ="zoomGraphFiles/index3.html"
+		}
+	}
+
+	
+</script>
+<script>  
+
+
+
+
+      var margin = {top: 20, right: 55, bottom: 30, left: 40},
+          width  = 1000 - margin.left - margin.right,
+          height = 500  - margin.top  - margin.bottom;
+
+      var x = d3.scale.ordinal()
+          .rangeRoundBands([0, width], .1);
+
+      var y = d3.scale.linear()
+          .rangeRound([height, 0]);
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+      /*var color = d3.scale.ordinal()
+          .range(["#001c9c","#101b4d","#475003","#9c8305","#d3c47c"]);
+*/
+      var svg = d3.select("#bar_chart").append("svg")
+          .attr("width",  width  + margin.left + margin.right)
+          .attr("height", height + margin.top  + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.csv("data/bar1.csv", function (error, data) {
+
+        var labelVar = 'wk';
+        var varNames = d3.keys(data[0]).filter(function (key) { return key !== labelVar;});
+        color.domain(varNames);
+
+        data.forEach(function (d) {
+          var y0 = 0;
+          d.mapping = varNames.map(function (name) { 
+            return {
+              name: name,
+              label: d[labelVar],
+              y0: y0,
+              y1: y0 += +d[name]
+            };
+          });
+          d.total = d.mapping[d.mapping.length - 1].y1;
+        });
+        console.log(data);
+
+        x.domain(data.map(function (d) { return d.wk; }));
+        y.domain([0, d3.max(data, function (d) { return d.total; })]);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+          .append("text") 
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("");
+
+        var selection = svg.selectAll(".series")
+            .data(data)
+          .enter().append("g")
+            .attr("class", "series")
+            .attr("transform", function (d) { return "translate(" + x(d.wk) + ",0)"; });
+
+        selection.selectAll("rect")
+          .data(function (d) { return d.mapping; })
+        .enter().append("rect")
+          .attr("width", x.rangeBand())
+          .attr("y", function (d) { return y(d.y1); })
+          .attr("height", function (d) { return y(d.y0) - y(d.y1); })
+          .style("fill", function (d) { return color(d.name); })
+          .style("stroke", "grey")
+          .on("mouseover", function (d) { showPopover.call(this, d); console.log(d); update(d.label); update_heading(d.label);})
+          .on("mouseout",  function (d) { removePopovers(); update("All"); update_heading("all weeks");})
+          .on("click", function(d) { showValue(d.label); });
+        var legend = svg.selectAll(".legend")
+            .data(varNames.slice().reverse())
+          .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function (d, i) { return "translate(55," + i * 20 + ")"; });
+
+        legend.append("rect")
+            .attr("x", width - 10)
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", color)
+            .style("stroke", "grey");
+
+        legend.append("text")
+            .attr("x", width - 12)
+            .attr("y", 6)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function (d) { return d; });
+
+        function removePopovers () {
+          $('.popover').each(function() {
+            $(this).remove();
+          }); 
+        }
+
+        function showPopover (d) {
+          $(this).popover({
+            title: d.name,
+            placement: 'auto top',
+            container: 'body',
+            trigger: 'manual',
+            html : true,
+            content: function() { 
+              return "Week: " + d.label + 
+                     "<br/>Count: " + d3.format(",")(d.value ? d.value: d.y1 - d.y0); }
+          });
+          $(this).popover('show')
+        }
+      });
+    </script>
+  </body>
+
+  <!-- Pie chart JS -->
+
+</html>
